@@ -119,7 +119,10 @@ def write_output(classes, converted):
     offspring = open('offspring-colony2-converted.txt', 'w')
     for iden, genotype in converted.iteritems():
         # get class of individual
-        cls = classes[iden]
+        try:
+            cls = classes[iden]
+        except KeyError, e:
+            print "{} is present in the genotypes file but missing from the mothers/fathers/offspring file".format(str(e))
         if cls == 'females':
             females.write("{0} {1}\n".format(iden, genotype.lstrip(' ')))
         elif cls == 'males':
