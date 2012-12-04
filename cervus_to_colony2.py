@@ -22,8 +22,8 @@ def get_args():
     parser = argparse.ArgumentParser(
             description="""Program description""")
     parser.add_argument(
-            "csv",
-            help="""The input CSV file containing data in CERVUS format"""
+            "genotypes",
+            help="""The input CSV file containing genotypes in CERVUS format"""
         )
     parser.add_argument(
             "mothers",
@@ -38,10 +38,10 @@ def get_args():
             help="""The CSV file containing putative offspring ids"""
         )
     parser.add_argument(
-            "--flag",
-            action="store_true",
-            default=False,
-            help="""Help text""",
+            "--start-column",
+            type=int,
+            default=2,
+            help="""The (0-indexed) column in which genotype values start""",
         )
     return parser.parse_args()
 
@@ -75,7 +75,6 @@ def get_loci_from_csv_file(input, startcol=2):
             else:
                 for pos, u in enumerate(unique):
                     loci[name][u] = pos + 1
-    #pdb.set_trace()
     return column_positions, loci
 
 
