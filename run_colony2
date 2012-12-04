@@ -1,0 +1,83 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+"""
+run_colony2.py
+
+Created by Brant Faircloth on 20 October 2010 13:55 PDT (-0700).
+Copyright (c) 2010 Brant C. Faircloth. All rights reserved.
+
+PURPOSE: to replace the flaky R function for running Colony2 from within R 
+which seems to mangle paths a lot of the time and does not deal real well with
+spaces/periods/etc. in filenames.
+
+USAGE:  run_colony2 --bin ~/Bin/colony_v2.0/colony2 --dat ~/path/to/my.DAT
+"""
+
+#import pdb
+import os
+import sys
+import time
+import shutil
+import optparse
+
+def interface():
+    '''Command-line interface'''
+    usage = "usage: %prog [options]"
+
+    p = optparse.OptionParser(usage)
+
+    p.add_option('--bin', dest = 'bin', action='store', 
+type='string', default = None, help='The path to the configuration file.', 
+metavar='FILE')
+    p.add_option('--dat', dest = 'dat', action='store', 
+type='string', default = None, help='The path to the configuration file.', 
+metavar='FILE')
+
+    (options,arg) = p.parse_args()
+    options.bin = os.path.abspath(os.path.expanduser(options.bin))
+    options.dat = os.path.abspath(os.path.expanduser(options.dat))
+    if not options.bin:
+        print "You must provide a valid path to colony2 binary."
+        p.print_help()
+        sys.exit(2)
+    if not options.dat:
+        print "You must provide a valid path to colony2 DAT file."
+        p.print_help()
+        sys.exit(2)
+    return options, arg 
+
+
+def main():
+    start_time      = time.time()
+    print 'Started: ', time.strftime("%a %b %d, %Y  %H:%M:%S", time.localtime(start_time))
+    options, args = interface()
+    my_dir, my_file = os.path.split(options.dat)
+    my_bin = os.path.split(options.bin)[1]
+    #pdb.set_trace()
+    os.chdir(my_dir)
+    print 'Changing directory to {0}'.format(my_dir)
+    # move a copy of the colony2 binary to the working directory
+    #pdb.set_trace()
+    if not os.path.isfile('colony2'):
+        print 'Creating a copy of the Colony2 binary in {0}...'.format(my_dir)
+        shutil.copyfile(options.bin, os.path.join(my_dir, my_bin))
+        os.chmod(my_bin, 0755)
+    # copy the data file to the name expected by colony2
+    print 'Creating a copy of the INPUT file ({0}) with the appropriate name [Colony2.DAT]...'.format(my_file)
+    shutil.copyfile(my_file, 'Colony2.DAT')
+    print 'Setting parameters for Colony2 run...'
+    os.system('export G95_MEM_SEGMENTS=0')
+    print 'Running Colony2 (this may take some time)...'
+    os.system('./colony2 | tee temp.txt')
+    print 'Unsetting environment variables...'
+    os.system('unset $G95_MEM_SEGMENTS')
+    print 'Cleaning up...'
+    os.remove('colony2')
+    os.remove('Colony2.DAT')
+    end_time = time.time()
+    print 'Ended: ', time.strftime("%a %b %d, %Y  %H:%M:%S", time.localtime(end_time))
+    print '\nTime for execution: ', (end_time - start_time)/60, 'minutes'
+    
+if __name__ == '__main__':
+    main()
