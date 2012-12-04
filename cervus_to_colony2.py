@@ -136,8 +136,8 @@ def write_output(classes, converted):
 def main():
     args = get_args()
     classes = get_individual_classes(args.mothers, args.fathers, args.offspring)
-    columns, loci = get_loci_from_csv_file(args.csv)
-    converted = convert_genotypes_from_csv_file(args.csv, columns, loci)
+    columns, loci = get_loci_from_csv_file(args.genotypes, args.start_column)
+    converted = convert_genotypes_from_csv_file(args.genotypes, columns, loci)
     write_output(classes, converted)
 
 
